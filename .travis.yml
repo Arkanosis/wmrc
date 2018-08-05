@@ -1,0 +1,17 @@
+language: android
+jdk: oraclejdk8
+
+android:
+  components:
+    - build-tools-27.0.3
+    - android-28
+
+before_install:
+  - chmod +x gradlew
+  - chmod +x gradle/wrapper/gradle-wrapper.jar
+  - yes | sdkmanager "platforms;android-28"
+script:
+  - ./gradlew test build
+
+notifications:
+  email: jroquet@arkanosis.net
