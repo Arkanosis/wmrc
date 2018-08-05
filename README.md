@@ -1,4 +1,4 @@
-# wmrc [![License](https://img.shields.io/badge/license-ISC-blue.svg)](/LICENSE) [![Build status](https://travis-ci.org/Arkanosis/wmrc.svg?branch=master)](https://travis-ci.org/Arkanosis/wmrc)
+# wmrc [![Version](https://img.shields.io/badge/version-v0.1.0--dev-orange.svg)](https://semver.org/spec/v2.0.0.html) [![License](https://img.shields.io/badge/license-ISC-blue.svg)](/LICENSE) [![Build status](https://travis-ci.org/Arkanosis/wmrc.svg?branch=master)](https://travis-ci.org/Arkanosis/wmrc)
 
 **wmrc** is a SUPER SECRET PROJECT AND I WON'T TELL YOU ANYTHING ABOUT IT.
 
