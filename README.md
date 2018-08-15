@@ -8,9 +8,9 @@
 
 DON'T ASK I WON'T TELL YOU ANYTHING.
 
-## Compiling
+## Compiling and installing
 
-I've been told `./gradlew` does compile, but why would you care?
+I've been told `./gradlew installDebug` does compile and install, but why would you care?
 
 ## Contributing and reporting bugs
 
