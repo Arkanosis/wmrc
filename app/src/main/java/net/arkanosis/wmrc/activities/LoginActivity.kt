@@ -1,4 +1,4 @@
-package net.arkanosis.wmrc
+package net.arkanosis.wmrc.activities
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -20,11 +20,13 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.TextView
-
-import java.util.ArrayList
 import android.Manifest.permission.READ_CONTACTS
 
+import java.util.ArrayList
+
 import kotlinx.android.synthetic.main.activity_login.*
+
+import net.arkanosis.wmrc.R
 
 /**
  * A login screen that offers login via email/password.

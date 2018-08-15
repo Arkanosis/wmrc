@@ -1,15 +1,16 @@
-package net.arkanosis.wmrc
+package net.arkanosis.wmrc.activities
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 
 import mehdi.sakout.aboutpage.AboutPage
 import mehdi.sakout.aboutpage.Element
 
+import net.arkanosis.wmrc.BuildConfig
+
 /**
  * An about screen that offers information on the app.
  */
-class AboutActivity : AppCompatActivity() {
+class AboutActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
