@@ -7,9 +7,6 @@ import mehdi.sakout.aboutpage.Element
 
 import net.arkanosis.wmrc.BuildConfig
 
-/**
- * An about screen that offers information on the app.
- */
 class AboutActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
