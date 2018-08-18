@@ -10,7 +10,9 @@ DON'T ASK I WON'T TELL YOU ANYTHING.
 
 ## Compiling and installing
 
-I've been told `./gradlew installDebug` does compile and install, but why would you care?
+I've been told `JAVA_HOME=/opt/android-studio/jre/ ./gradlew :app:uninstallDebug :app:installDebug` does compile and install on your target device, but why would you care?
+
+By the way, since it seems you care, `JAVA_HOME=/opt/android-studio/jre/ ./gradlew :lib:run` runs the kotlin lib (not the app!) on dev device.
 
 ## Contributing and reporting bugs
 
@@ -20,5 +22,4 @@ Please report bugs and feature requests on [GitHub issues](https://github.com/Ar
 
 ## License
 
-wmrc is copyright (C) 2018 Jérémie Roquet <jroquet@arkanosis.net> and
-licensed under the ISC license.
+wmrc is copyright (C) 2018 Jérémie Roquet <jroquet@arkanosis.net> and licensed under the ISC license.
