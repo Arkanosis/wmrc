@@ -28,10 +28,12 @@ cat >| "$OUT" <<EOF
 				border-radius: 0.33em;
 			}
 			.diff-addedline {
-				border-color: #a3d3ff;
+				/*border-color: #a3d3ff;*/ /* TODO this and below: propose themes: GitHub, MediaWiki and others */
+				border-color: #bef5cb;
 			}
 			.diff-deletedline {
-				border-color: #ffe49c;
+				/*border-color: #ffe49c;*/
+				border-color: #fdaeb7;
 			}
 			.diff-context {
 				background: #f8f9fa;
@@ -47,10 +49,12 @@ cat >| "$OUT" <<EOF
 				padding: 0.25em 0;
 			}
 			.diff-addedline .diffchange {
-				background: #d8ecff;
+				/*background: #d8ecff;*/
+				background: #bef5cb;
 			}
 			.diff-deletedline .diffchange {
-				background: #feeec8;
+				/*background: #feeec8;*/
+				background: #fdaeb7;
 			}
 		</style>
 	</head>
