@@ -6,17 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activities.MainActivity">
+    tools:context=".activities.SettingsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
+        <LinearLayout
             android:gravity="top"
+            android:orientation="vertical"
             android:background="?attr/colorPrimary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -26,14 +27,15 @@
                 app:navigationIcon="?homeAsUpIndicator"
                 app:popupTheme="?attr/actionBarPopupTheme" />
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/text_view_id"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:background="?attr/colorAccent"
+                android:text="@string/activity_settings_nothing" /> <!-- TODO fix background color -->
+
+        </LinearLayout>
 
     </android.support.design.widget.AppBarLayout>
-
-    <TextView
-        android:id="@+id/text_view_id"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/activity_settings_nothing" />
 
 </android.support.design.widget.CoordinatorLayout>
