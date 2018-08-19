@@ -16,6 +16,9 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar);
+        web_view_id.loadData(getResources().openRawResource(R.raw.diff).reader().use { it.readText() }, "text/html; charset=utf-8", null)
+        web_view_id.setInitialScale(1)
+        web_view_id.getSettings().setUseWideViewPort(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

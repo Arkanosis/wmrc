@@ -10,11 +10,11 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:gravity="top"
-	    android:orientation="vertical"
+            android:orientation="vertical"
             android:background="?attr/colorPrimary"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -26,6 +26,11 @@
                 android:background="?attr/colorPrimary"
                 app:navigationIcon="?homeAsUpIndicator"
                 app:popupTheme="?attr/actionBarPopupTheme" />
+
+            <WebView
+                android:id="@+id/web_view_id"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent" />
 
         </LinearLayout>
 
