@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">WMRC</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Mot de passe (optionnel)</string>
+    <string name="action_sign_in">S\'identifier ou s\'inscrire</string>
+    <string name="action_sign_in_short">S\'identifier</string>
+    <string name="error_invalid_email">Cette adresse email est invalide</string>
+    <string name="error_invalid_password">Ce mot de passe est trop court</string>
+    <string name="error_incorrect_password">Ce mot de passe est incorrect</string>
+    <string name="error_field_required">Cette information est requise</string>
+    <string name="permission_rationale">"L\'accès aux contacts est nécessaire pour permettre la complétion automatique."</string>
+    <string name="menu_main_settings">Paramètres</string>
+    <string name="menu_main_about">À propos</string>
+    <string name="activity_settings_title">Paramètres</string>
+    <string name="activity_settings_nothing">Pas de paramètres pour le moment ! Revenez plus tard.</string>
+</resources>
