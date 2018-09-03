@@ -1,39 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".activities.MainActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+  <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      android:background="?attr/colorPrimary"
+      app:navigationIcon="?homeAsUpIndicator"
+      app:popupTheme="?attr/actionBarPopupTheme"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:gravity="top"
-            android:orientation="vertical"
-            android:background="?attr/colorPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+  <LinearLayout
+      android:id="@+id/buttons_id"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      android:layout_alignParentBottom="true"
+      android:background="?attr/colorPrimary"
+      android:gravity="center"
+      android:orientation="horizontal"
+      android:weightSum="2"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:navigationIcon="?homeAsUpIndicator"
-                app:popupTheme="?attr/actionBarPopupTheme" />
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/revert_id"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_toLeftOf="@id/patrol_id"
+        android:layout_weight="1"
+        android:text="@string/activity_main_revert"
+        android:textColor="@color/white"
+        android:background="@color/red"/>
 
-            <WebView
-                android:id="@+id/web_view_id"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent" />
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/patrol_id"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentRight="true"
+        android:layout_weight="1"
+        android:text="@string/activity_main_patrol"
+        android:textColor="@color/white"
+        android:background="@color/green"/>
 
-        </LinearLayout>
+  </LinearLayout>
 
-    </android.support.design.widget.AppBarLayout>
+  <WebView
+      android:id="@+id/web_view_id"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      app:layout_constraintBottom_toTopOf="@+id/buttons_id"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-</android.support.design.widget.CoordinatorLayout>
+</android.support.constraint.ConstraintLayout>

@@ -13,6 +13,8 @@
     <string name="permission_rationale">"L\'accès aux contacts est nécessaire pour permettre la complétion automatique."</string>
     <string name="menu_main_settings">Paramètres</string>
     <string name="menu_main_about">À propos</string>
+    <string name="activity_main_revert">Annuler</string>
+    <string name="activity_main_patrol">Approuver</string>
     <string name="activity_settings_title">Paramètres</string>
     <string name="activity_settings_nothing">Pas de paramètres pour le moment ! Revenez plus tard.</string>
 </resources>
