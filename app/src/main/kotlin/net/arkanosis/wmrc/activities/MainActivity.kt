@@ -25,9 +25,10 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar)
         web_view_id.setInitialScale(1)
         web_view_id.getSettings().setUseWideViewPort(true)
+
         switchDiff()
 
         val revertButton = findViewById(R.id.revert_id) as AppCompatButton
