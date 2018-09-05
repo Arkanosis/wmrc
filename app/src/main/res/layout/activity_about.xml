@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+					     xmlns:app="http://schemas.android.com/apk/res-auto"
+					     xmlns:tools="http://schemas.android.com/tools"
+					     android:id="@+id/constraintLayout"
+					     android:layout_width="match_parent"
+					     android:layout_height="match_parent"
+					     android:fitsSystemWindows="true"
+					     tools:context=".activities.MainActivity">
+
+  <android.support.v7.widget.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      android:background="?attr/colorPrimary"
+      app:navigationIcon="?homeAsUpIndicator"
+      app:popupTheme="?attr/actionBarPopupTheme"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+  <ScrollView
+      android:id="@+id/scrollview"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="?attr/colorPrimary"
+      android:layout_alignParentBottom="true"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent">
+
+    <LinearLayout
+	android:gravity="top"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+      <ImageView
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:gravity="center"
+	  android:src="@drawable/ic_launcher_background" />
+
+      <TextView
+	  style="?android:textAppearanceLarge"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:gravity="center"
+	  android:text="@string/app_name" />
+
+      <TextView
+	  android:id="@+id/about_version"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:gravity="center" />
+
+      <android.support.v7.widget.AppCompatTextView
+	  android:id="@+id/about_description"
+	  style="?android:textAppearanceSmall"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:gravity="center"
+	  android:text="@string/activity_about_description" />
+
+      <android.support.v7.widget.AppCompatTextView
+	  android:id="@+id/about_website"
+	  style="?android:textAppearanceSmall"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:gravity="center"
+	  android:text="@string/activity_about_website" />
+
+      <android.support.v7.widget.AppCompatTextView
+	  android:id="@+id/about_license"
+	  style="?android:textAppearanceSmall"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:gravity="center"
+	  android:text="@string/activity_about_license" />
+
+    </LinearLayout>
+
+  </ScrollView>>
+
+</android.support.constraint.ConstraintLayout>

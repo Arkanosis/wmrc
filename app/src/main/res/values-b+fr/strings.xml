@@ -1,4 +1,5 @@
 <resources>
+  <string name="app_name">wmrc</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Mot de passe (optionnel)</string>
     <string name="action_sign_in">S\'identifier ou s\'inscrire</string>
@@ -12,6 +13,9 @@
     <string name="menu_main_about">À propos</string>
     <string name="activity_main_revert">Annuler</string>
     <string name="activity_main_patrol">Approuver</string>
+    <string name="activity_about_description">Wikimedia recent changes in real time on your mobile device</string>
+    <string name="activity_about_website">https://wmrc.arkanosis.net/</string>
+    <string name="activity_about_license">wmrc is copyright (C) 2018 Jérémie Roquet jroquet@arkanosis.net and licensed under the ISC license.</string>
     <string name="activity_settings_title">Paramètres</string>
     <string name="activity_settings_nothing">Pas de paramètres pour le moment ! Revenez plus tard.</string>
 </resources>
