@@ -10,9 +10,13 @@ DON'T ASK I WON'T TELL YOU ANYTHING.
 
 ## Compiling and installing
 
-I've been told `JAVA_HOME=/opt/android-studio/jre/ ./gradlew :app:uninstallDebug :app:installDebug` does compile and install on your target device, but why would you care?
+I've been told that:
+ * `make build` does build,
+ * `make install` does install,
+ * `make run` does run
+… but why would you care?
 
-By the way, since it seems you care, `JAVA_HOME=/opt/android-studio/jre/ ./gradlew :lib:run` runs the kotlin lib (not the app!) on dev device.
+By the way, since it seems you care, `make experiment` runs the kotlin lib (not the app!) on the dev device.
 
 ## Contributing and reporting bugs
 
