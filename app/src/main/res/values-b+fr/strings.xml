@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name">WMRC</string>
-
-    <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Mot de passe (optionnel)</string>
     <string name="action_sign_in">S\'identifier ou s\'inscrire</string>
