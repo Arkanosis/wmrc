@@ -1,10 +1,9 @@
 package net.arkanosis.wrc
 
-import com.beust.klaxon.Klaxon
-
 import com.github.kittinunf.fuel.*
 import com.github.kittinunf.fuel.gson.*
 
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
 import com.saladevs.rxsse.RxSSE
@@ -102,12 +101,13 @@ private fun showDiff(revision: Int) {
 
 private fun showRecentChanges(showDiffs: Boolean = false) {
 	try {
+		val gson = Gson()
 		RxSSE()
 			.connectTo("https://stream.wikimedia.org/v2/stream/recentchange")
 			.subscribe(
 				{ event ->
 					if (event.data != "") {
-						val recentChange = Klaxon().parse<RecentChange>(event.data)
+						val recentChange = gson.fromJson(event.data, RecentChange::class.java)
 						if (recentChange != null &&
 						    !recentChange.bot &&
 						    recentChange.wiki == "frwiki" &&
