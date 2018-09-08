@@ -75,8 +75,8 @@ data class Response(
 
 private val pageTemplate = Any::class.java.getResource("/page.html").readText();
 
-private fun showDiff(revision: Int) {
-	val (_, http, result) = "https://fr.wikipedia.org/w/api.php?action=compare&torelative=prev&fromrev=${revision}&format=json".httpGet().responseObject<Response>()
+private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int) {
+	val (_, http, result) = "${serverUrl}${serverScriptPath}/api.php?action=compare&torelative=prev&fromrev=${revision}&format=json".httpGet().responseObject<Response>()
 	if (http.statusCode == 200) {
 		val (response, error) = result
 		if (error == null) {
@@ -112,11 +112,11 @@ private fun showRecentChanges(showDiffs: Boolean = false) {
 						val recentChange = gson.fromJson(event.data, RecentChange::class.java)
 						if (recentChange != null &&
 						    !recentChange.bot &&
-						    recentChange.wiki == "frwiki" &&
+						    (recentChange.wiki == "frwiki" || recentChange.wiki == "frwiktionary") &&
 						    recentChange.type == "edit") {
-							println("User '${recentChange.user}' edited '${recentChange.title}'${if (recentChange.minor) " (minor edit)" else ""}")
+							println("User '${recentChange.user}' edited '${recentChange.title}' on ${recentChange.wiki}${if (recentChange.minor) " (minor edit)" else ""}")
 							if (showDiffs && recentChange.revision != null) {
-								showDiff(recentChange.revision.new)
+								showDiff(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new)
 							}
 						}
 					}
