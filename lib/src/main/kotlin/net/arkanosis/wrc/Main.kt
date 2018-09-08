@@ -73,6 +73,8 @@ data class Response(
 	val compare: Compare? = null
 )
 
+private val pageTemplate = Any::class.java.getResource("/page.html").readText();
+
 private fun showDiff(revision: Int) {
 	val (_, http, result) = "https://fr.wikipedia.org/w/api.php?action=compare&torelative=prev&fromrev=${revision}&format=json".httpGet().responseObject<Response>()
 	if (http.statusCode == 200) {
@@ -85,7 +87,7 @@ private fun showDiff(revision: Int) {
 					println("KO compare")
 				} else {
 					println("OK")
-					println(response.compare.diff)
+					println(pageTemplate.replace("\${content}", response.compare.diff))
 				}
 			}
 		} else {
