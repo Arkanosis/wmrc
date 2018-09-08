@@ -2,9 +2,18 @@ package net.arkanosis.wrc
 
 import com.beust.klaxon.Klaxon
 
+import com.github.kittinunf.fuel.*
+import com.github.kittinunf.fuel.gson.*
+
+import com.google.gson.annotations.SerializedName
+
 import com.saladevs.rxsse.RxSSE
 
 import java.net.UnknownHostException
+
+// TODO all fields should be nullable and checked
+// because we can't reliably expect that the HTTP
+// answer will contain anything
 
 data class Length(
 	val new: Int,
@@ -48,23 +57,79 @@ data class RecentChange(
 	val wiki: String
 )
 
-fun main(args : Array<String>) {
+data class Compare(
+	val fromid: Int,
+	val fromrevid: Int,
+	val fromns: Int,
+	val fromtitle: String,
+	val toid: Int,
+	val torevid: Int,
+	val tons: Int,
+	val totitle: String,
+	@SerializedName("*")
+	val diff: String
+)
+
+data class Response(
+	val compare: Compare? = null
+)
+
+private fun showDiff(revision: Int) {
+	val (_, http, result) = "https://fr.wikipedia.org/w/api.php?action=compare&torelative=prev&fromrev=${revision}&format=json".httpGet().responseObject<Response>()
+	if (http.statusCode == 200) {
+		val (response, error) = result
+		if (error == null) {
+			if (response == null) {
+				println("KO response")
+			} else {
+				if (response.compare == null) {
+					println("KO compare")
+				} else {
+					println("OK")
+					println(response.compare.diff)
+				}
+			}
+		} else {
+			println("KO error")
+			println(error)
+		}
+	} else {
+		println("KO http")
+		println(http)
+	}
+	println("END")
+}
+
+private fun showRecentChanges(showDiffs: Boolean = false) {
 	try {
 		RxSSE()
 			.connectTo("https://stream.wikimedia.org/v2/stream/recentchange")
-			.subscribe { event ->
-				if (event.data != "") {
-					val recentChange = Klaxon().parse<RecentChange>(event.data)
-					if (recentChange != null &&
-					    !recentChange.bot &&
-					    recentChange.wiki == "frwiki" &&
-					    recentChange.type == "edit") {
-						println("User '${recentChange.user}' edited '${recentChange.title}'${if (recentChange.minor) " (minor edit)" else ""}")
+			.subscribe(
+				{ event ->
+					if (event.data != "") {
+						val recentChange = Klaxon().parse<RecentChange>(event.data)
+						if (recentChange != null &&
+						    !recentChange.bot &&
+						    recentChange.wiki == "frwiki" &&
+						    recentChange.type == "edit") {
+							println("User '${recentChange.user}' edited '${recentChange.title}'${if (recentChange.minor) " (minor edit)" else ""}")
+							if (showDiffs && recentChange.revision != null) {
+								showDiff(recentChange.revision.new)
+							}
+						}
 					}
+				},
+				{ error ->
+					println("KO SSE")
+					println(error)
 				}
-			}
+			)
 			.dispose()
 	} catch (e: UnknownHostException) {
 		System.err.println("Unable to reach the server; are you connected to the network?");
 	}
+}
+
+fun main(args : Array<String>) {
+	showRecentChanges(showDiffs=true);
 }
