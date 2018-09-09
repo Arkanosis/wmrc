@@ -10,6 +10,10 @@ import com.saladevs.rxsse.RxSSE
 
 import java.net.UnknownHostException
 
+import kotlin.collections.ArrayList
+
+import net.arkanosis.wrc.Arktest
+
 // TODO all fields should be nullable and checked
 // because we can't reliably expect that the HTTP
 // answer will contain anything
@@ -69,14 +73,156 @@ data class Compare(
 	val diff: String
 )
 
-data class Response(
+data class CompareResponse(
 	val compare: Compare? = null
 )
 
-private val pageTemplate = Any::class.java.getResource("/page.html").readText();
+data class Token(
+	val logintoken: String
+)
+
+data class TokenQuery(
+	val tokens: Token? = null
+)
+
+data class TokenResponse(
+	val query: TokenQuery? = null
+)
+
+data class Login(
+	val result: String,
+	val lguserid: Int,
+        val lgusername: String
+)
+
+data class LoginResponse(
+	val login: Login? = null
+)
+
+private val pageTemplate = Any::class.java.getResource("/page.html").readText()
+
+private val cookies = ArrayList<String>()
+
+private fun getLoginToken(): String? {
+	val (_, http, result) = Fuel.get("https://meta.wikimedia.org/w/api.php",
+		listOf(
+			"action" to "query",
+			"type" to "login",
+			"meta" to "tokens",
+			"format" to "json"
+		))
+		.header("Cookie" to cookies.joinToString(separator=";"))
+		.responseObject<TokenResponse>()
+	cookies.clear()
+	http.headers.get("Set-Cookie")?.forEach { string ->
+		string.split("; *".toRegex()).forEach { cookie ->
+			cookies.add(cookie)
+		}
+	}
+	if (http.statusCode == 200) {
+		val (response, error) = result
+		if (error == null) {
+			if (response == null) {
+				println("KO response")
+			} else {
+				if (response.query == null) {
+					println("KO query")
+				} else {
+					if (response.query.tokens?.logintoken == null) {
+						println("KO token")
+					} else {
+						println("OK token")
+						println(response.query.tokens.logintoken)
+						return response.query.tokens.logintoken
+					}
+				}
+			}
+		} else {
+			println("KO error")
+			println(error)
+		}
+	} else {
+		println("KO http")
+		println(http)
+	}
+	return null
+}
+
+private fun login(userName: String, password: String): Boolean {
+	val token = getLoginToken()
+	if (token == null) {
+		return false
+	}
+
+	val (_, http, result) = Fuel.post("https://meta.wikimedia.org/w/api.php",
+		listOf(
+			"action" to "login",
+			"lgname" to userName,
+			"lgpassword" to password,
+			"lgtoken" to token,
+			"format" to "json"
+		))
+		.header("Cookie" to cookies.joinToString(separator=";"))
+		.responseObject<LoginResponse>()
+	cookies.clear()
+	http.headers.get("Set-Cookie")?.forEach { string ->
+		string.split("; *".toRegex()).forEach { cookie ->
+			cookies.add(cookie)
+		}
+	}
+	if (http.statusCode == 200) {
+		val (response, error) = result
+		if (error == null) {
+			if (response == null) {
+				println("KO response")
+			} else {
+				if (response.login == null) {
+					println("KO login")
+					println(response)
+				} else {
+					if (response.login.result == "Success") {
+						println("OK login")
+						println(response.login.lgusername)
+						return true
+					} else if (response.login.result == "NeedToken") {
+						println("KO token needed again")
+					} else {
+						println("KO success")
+					}
+				}
+			}
+		} else {
+			println("KO error")
+			println(error)
+		}
+	} else {
+		println("KO http")
+		println(http)
+	}
+	println("END")
+	return false
+}
+
+private fun editPage(serverUrl: String, serverScriptPath: String, title: String, comment: String, text: String, minor: Boolean = false) {
+	// TODO FIXME
+}
 
 private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int) {
-	val (_, http, result) = "${serverUrl}${serverScriptPath}/api.php?action=compare&torelative=prev&fromrev=${revision}&format=json".httpGet().responseObject<Response>()
+	val (_, http, result) = Fuel.get("${serverUrl}${serverScriptPath}/api.php",
+		listOf(
+			"action" to "compare",
+			"fromrev" to revision,
+			"torelative" to "prev",
+			"format" to "json"
+		))
+		.header("Cookie" to cookies.joinToString(separator=";"))
+		.responseObject<CompareResponse>()
+	cookies.clear()
+	http.headers.get("Set-Cookie")?.forEach { string ->
+		string.split("; *".toRegex()).forEach { cookie ->
+			cookies.add(cookie)
+		}
+	}
 	if (http.statusCode == 200) {
 		val (response, error) = result
 		if (error == null) {
@@ -101,7 +247,11 @@ private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int)
 	println("END")
 }
 
-private fun showRecentChanges(showDiffs: Boolean = false) {
+private fun revert(serverUrl: String, serverScriptPath: String, revision: Int, comment: String) {
+	// TODO FIXME
+}
+
+private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean = false) {
 	try {
 		val gson = Gson()
 		RxSSE()
@@ -115,8 +265,13 @@ private fun showRecentChanges(showDiffs: Boolean = false) {
 						    (recentChange.wiki == "frwiki" || recentChange.wiki == "frwiktionary") &&
 						    recentChange.type == "edit") {
 							println("User '${recentChange.user}' edited '${recentChange.title}' on ${recentChange.wiki}${if (recentChange.minor) " (minor edit)" else ""}")
-							if (showDiffs && recentChange.revision != null) {
-								showDiff(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new)
+							if (recentChange.revision != null) {
+								if (showDiffs) {
+									showDiff(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new)
+								}
+								if (autoRevert && recentChange.comment.contains("wmrc:autorevert")) {
+									revert(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new, "[[WP:wmrc]] autorevert")
+								}
 							}
 						}
 					}
@@ -128,10 +283,12 @@ private fun showRecentChanges(showDiffs: Boolean = false) {
 			)
 			.dispose()
 	} catch (e: UnknownHostException) {
-		System.err.println("Unable to reach the server; are you connected to the network?");
+		System.err.println("Unable to reach the server; are you connected to the network?")
 	}
 }
 
 fun main(args : Array<String>) {
-	showRecentChanges(showDiffs=true);
+	login(Arktest.LOGIN, Arktest.PASSWORD)
+//	editPage("https://fr.wikipedia.org", "/w", "Utilisateur:Arktest/test", "[[WP:wmrc]] test", "Test.")
+//	monitorRecentChanges(showDiffs=true, autoRevert=true)
 }
