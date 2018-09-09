@@ -15,10 +15,15 @@ wmrc features:
  * patrol and revert buttons;
  * filtering based on the user group;
  * filtering based on the wiki.
+ 
+Additionaly, wmrc is designed to take into account the following properties of mobile phones and tablets:
+ * small screen (too little to use traditional tools);
+ * tactile screen (less precise and versatile than the mouse + keyboard combo);
+ * mobile internet connection (with frequent loss of signal and occasional change of IP address)
 
 ## Compiling and installing
 
-Once ready for mainstream usage, wmrc will be distributed for free through [f-droid](https://f-droid.org/), and *maybe* through [Google Play](https://play.google.com/store) as well.
+Once ready for mainstream usage, wmrc will be distributed for free through [F-Droid](https://f-droid.org/), and *maybe* through [Google Play](https://play.google.com/store) as well.
 
 Until then, clone this repository and use:
  * `make build` to compile;
