@@ -60,6 +60,20 @@ data class RecentChange(
 	val wiki: String
 )
 
+data class Edit(
+	val result: String,
+	val pageid: Int,
+	val title: String,
+	val contentmodel: String,
+	val oldrevid: Int?,
+	val newrevid: Int,
+	val newtimestamp: String
+)
+
+data class EditResponse(
+	val edit: Edit? = null
+)
+
 data class Compare(
 	val fromid: Int,
 	val fromrevid: Int,
@@ -78,7 +92,8 @@ data class CompareResponse(
 )
 
 data class Token(
-	val logintoken: String
+	val csrftoken: String?,
+	val logintoken: String?
 )
 
 data class TokenQuery(
@@ -103,17 +118,16 @@ private val pageTemplate = Any::class.java.getResource("/page.html").readText()
 
 private val cookies = ArrayList<String>()
 
-private fun getLoginToken(): String? {
-	val (_, http, result) = Fuel.get("https://meta.wikimedia.org/w/api.php",
+private fun getToken(serverUrl: String, serverScriptPath: String, type: String): String? {
+	val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
 		listOf(
 			"action" to "query",
-			"type" to "login",
+			"type" to type,
 			"meta" to "tokens",
 			"format" to "json"
 		))
 		.header("Cookie" to cookies.joinToString(separator=";"))
 		.responseObject<TokenResponse>()
-	cookies.clear()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
 			cookies.add(cookie)
@@ -128,12 +142,16 @@ private fun getLoginToken(): String? {
 				if (response.query == null) {
 					println("KO query")
 				} else {
-					if (response.query.tokens?.logintoken == null) {
-						println("KO token")
-					} else {
-						println("OK token")
+					if (response.query.tokens?.logintoken != null) {
+						println("OK login token")
 						println(response.query.tokens.logintoken)
 						return response.query.tokens.logintoken
+					} else if (response.query.tokens?.csrftoken != null) {
+						println("OK csrf token")
+						println(response.query.tokens.csrftoken)
+						return response.query.tokens.csrftoken
+					}  else {
+						println("KO token")
 					}
 				}
 			}
@@ -148,13 +166,13 @@ private fun getLoginToken(): String? {
 	return null
 }
 
-private fun login(userName: String, password: String): Boolean {
-	val token = getLoginToken()
+private fun login(serverUrl: String, serverScriptPath: String, userName: String, password: String): Boolean {
+	val token = getToken(serverUrl, serverScriptPath, "login")
 	if (token == null) {
 		return false
 	}
 
-	val (_, http, result) = Fuel.post("https://meta.wikimedia.org/w/api.php",
+	val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
 		listOf(
 			"action" to "login",
 			"lgname" to userName,
@@ -164,7 +182,6 @@ private fun login(userName: String, password: String): Boolean {
 		))
 		.header("Cookie" to cookies.joinToString(separator=";"))
 		.responseObject<LoginResponse>()
-	cookies.clear()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
 			cookies.add(cookie)
@@ -203,8 +220,55 @@ private fun login(userName: String, password: String): Boolean {
 	return false
 }
 
-private fun editPage(serverUrl: String, serverScriptPath: String, title: String, comment: String, text: String, minor: Boolean = false) {
-	// TODO FIXME
+private fun editPage(serverUrl: String, serverScriptPath: String, title: String, comment: String, text: String, minor: Boolean = false): Boolean {
+	val token = getToken(serverUrl, serverScriptPath, "csrf")
+	if (token == null) {
+		return false
+	}
+
+	val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
+		listOf(
+			"action" to "edit",
+			"tags" to "wmrc",
+			"assert" to "user",
+			"title" to title,
+			"summary" to comment,
+			"text" to text,
+			"minor" to minor,
+			"token" to token,
+			"format" to "json"
+		))
+		.header("Cookie" to cookies.joinToString(separator=";"))
+		.responseObject<EditResponse>()
+	http.headers.get("Set-Cookie")?.forEach { string ->
+		string.split("; *".toRegex()).forEach { cookie ->
+			cookies.add(cookie)
+		}
+	}
+	if (http.statusCode == 200) {
+		val (response, error) = result
+		if (error == null) {
+			if (response == null) {
+				println("KO response")
+			} else {
+				if (response.edit == null || response.edit.result != "Success") {
+					println("KO edit")
+				} else {
+					println("OK")
+					println(response.edit.newrevid)
+					return true
+				}
+			}
+		} else {
+			println("KO error")
+			println(error)
+		}
+	} else {
+		println("KO http")
+		println(http)
+	}
+	println("END")
+	return false
 }
 
 private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int) {
@@ -217,7 +281,6 @@ private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int)
 		))
 		.header("Cookie" to cookies.joinToString(separator=";"))
 		.responseObject<CompareResponse>()
-	cookies.clear()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
 			cookies.add(cookie)
@@ -270,7 +333,7 @@ private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean
 									showDiff(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new)
 								}
 								if (autoRevert && recentChange.comment.contains("wmrc:autorevert")) {
-									revert(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new, "[[WP:wmrc]] autorevert")
+									revert(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new, "Autorevert")
 								}
 							}
 						}
@@ -288,7 +351,7 @@ private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean
 }
 
 fun main(args : Array<String>) {
-	login(Arktest.LOGIN, Arktest.PASSWORD)
-//	editPage("https://fr.wikipedia.org", "/w", "Utilisateur:Arktest/test", "[[WP:wmrc]] test", "Test.")
-//	monitorRecentChanges(showDiffs=true, autoRevert=true)
+	// TODO FIXME handle login at the SUL level
+	login("https://fr.wikipedia.org", "/w", Arktest.LOGIN, Arktest.PASSWORD)
+	editPage("https://fr.wikipedia.org", "/w", "Utilisateur:Arktest/test", "Test", "Test.")
 }
