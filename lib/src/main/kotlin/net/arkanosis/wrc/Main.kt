@@ -79,7 +79,7 @@ data class EditResponse(
 	val edit: Edit? = null
 )
 
-data class RevertResponse(
+data class UndoResponse(
 	val edit: Edit? = null
 )
 
@@ -289,7 +289,7 @@ private fun editPage(serverUrl: String, serverScriptPath: String, title: String,
 	return false
 }
 
-private fun revert(serverUrl: String, serverScriptPath: String, title: String, revision: Int, comment: String): Boolean {
+private fun undo(serverUrl: String, serverScriptPath: String, title: String, revision: Int, comment: String): Boolean {
 	val token = getToken(serverUrl, serverScriptPath, "csrf")
 	if (token == null) {
 		return false
@@ -310,7 +310,7 @@ private fun revert(serverUrl: String, serverScriptPath: String, title: String, r
 			"User-Agent" to USER_AGENT,
 			"Cookie" to cookies.joinToString(separator=";")
 		)
-		.responseObject<RevertResponse>()
+		.responseObject<UndoResponse>()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
 			cookies.add(cookie)
@@ -403,7 +403,7 @@ private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean
 									showDiff(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new)
 								}
 								if (autoRevert && recentChange.comment.contains("wmrc:autorevert")) {
-									revert(recentChange.server_url, recentChange.server_script_path, recentChange.title, recentChange.revision.new, "Autorevert")
+									undo(recentChange.server_url, recentChange.server_script_path, recentChange.title, recentChange.revision.new, "Autorevert")
 								}
 							}
 						}
@@ -426,5 +426,5 @@ fun main(args : Array<String>) {
 	// TODO FIXME handle login at the SUL level
 	login(serverUrl, "/w", Arktest.LOGIN, Arktest.PASSWORD)
 	editPage(serverUrl, "/w", "Utilisateur:Arktest/test", "Test", "Test.")
-	revert(serverUrl, "/w", "Utilisateur:Arktest/test", 152215779, "Revert")
+	undo(serverUrl, "/w", "Utilisateur:Arktest/test", 152215779, "Revert")
 }
