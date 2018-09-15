@@ -83,6 +83,16 @@ data class UndoResponse(
 	val edit: Edit? = null
 )
 
+data class Patrol(
+	val rcid: Int,
+	val ns: Int,
+	val title: String
+)
+
+data class PatrolResponse(
+	val patrol: Patrol? = null
+)
+
 data class Compare(
 	val fromid: Int,
 	val fromrevid: Int,
@@ -101,8 +111,9 @@ data class CompareResponse(
 )
 
 data class Token(
+	val logintoken: String?,
 	val csrftoken: String?,
-	val logintoken: String?
+	val patroltoken: String?
 )
 
 data class TokenQuery(
@@ -162,6 +173,10 @@ private fun getToken(serverUrl: String, serverScriptPath: String, type: String):
 						println("OK csrf token")
 						println(response.query.tokens.csrftoken)
 						return response.query.tokens.csrftoken
+					} else if (response.query.tokens?.patroltoken != null) {
+						println("OK patrol token")
+						println(response.query.tokens.patroltoken)
+						return response.query.tokens.patroltoken
 					}  else {
 						println("KO token")
 					}
@@ -342,6 +357,57 @@ private fun undo(serverUrl: String, serverScriptPath: String, title: String, rev
 	return false
 }
 
+private fun patrol(serverUrl: String, serverScriptPath: String, revision: Int): Boolean {
+	val token = getToken(serverUrl, serverScriptPath, "patrol")
+	if (token == null) {
+		return false
+	}
+
+	val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
+		listOf(
+			"action" to "patrol",
+			"tags" to "wmrc",
+			"assert" to "user",
+			"revid" to revision,
+			"token" to token,
+			"format" to "json"
+		))
+		.header(
+			"User-Agent" to USER_AGENT,
+			"Cookie" to cookies.joinToString(separator=";")
+		)
+		.responseObject<PatrolResponse>()
+	http.headers.get("Set-Cookie")?.forEach { string ->
+		string.split("; *".toRegex()).forEach { cookie ->
+			cookies.add(cookie)
+		}
+	}
+	if (http.statusCode == 200) {
+		val (response, error) = result
+		if (error == null) {
+			if (response == null) {
+				println("KO response")
+			} else {
+				if (response.patrol == null) {
+					println("KO patrol")
+				} else {
+					println("OK")
+					println(response.patrol.rcid)
+					return true
+				}
+			}
+		} else {
+			println("KO error")
+			println(error)
+		}
+	} else {
+		println("KO http")
+		println(http)
+	}
+	println("END")
+	return false
+}
+
 private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int) {
 	val (_, http, result) = Fuel.get("${serverUrl}${serverScriptPath}/api.php",
 		listOf(
@@ -425,6 +491,7 @@ fun main(args : Array<String>) {
 	//val serverUrl = "http://localhost:8080"
 	// TODO FIXME handle login at the SUL level
 	login(serverUrl, "/w", Arktest.LOGIN, Arktest.PASSWORD)
-	editPage(serverUrl, "/w", "Utilisateur:Arktest/test", "Test", "Test.")
-	undo(serverUrl, "/w", "Utilisateur:Arktest/test", 152215779, "Revert")
+	// editPage(serverUrl, "/w", "Utilisateur:Arktest/test", "Test", "Test.")
+	// undo(serverUrl, "/w", "Utilisateur:Arktest/test", 152215779, "Revert")
+	patrol("https://fr.wikipedia.org", "/w", 152223800)
 }
