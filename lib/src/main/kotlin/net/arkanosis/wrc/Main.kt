@@ -14,6 +14,11 @@ import kotlin.collections.ArrayList
 
 import net.arkanosis.wrc.Arktest
 
+// Get the version number from the build.gradle
+const val VERSION_NAME = "0.1.0-dev"
+
+var USER_AGENT = "wmrc/v$VERSION_NAME"
+
 // TODO all fields should be nullable and checked
 // because we can't reliably expect that the HTTP
 // answer will contain anything
@@ -126,7 +131,10 @@ private fun getToken(serverUrl: String, serverScriptPath: String, type: String):
 			"meta" to "tokens",
 			"format" to "json"
 		))
-		.header("Cookie" to cookies.joinToString(separator=";"))
+		.header(
+			"User-Agent" to USER_AGENT,
+			"Cookie" to cookies.joinToString(separator=";")
+		)
 		.responseObject<TokenResponse>()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
@@ -180,7 +188,10 @@ private fun login(serverUrl: String, serverScriptPath: String, userName: String,
 			"lgtoken" to token,
 			"format" to "json"
 		))
-		.header("Cookie" to cookies.joinToString(separator=";"))
+		.header(
+			"User-Agent" to USER_AGENT,
+			"Cookie" to cookies.joinToString(separator=";")
+		)
 		.responseObject<LoginResponse>()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
@@ -238,7 +249,10 @@ private fun editPage(serverUrl: String, serverScriptPath: String, title: String,
 			"token" to token,
 			"format" to "json"
 		))
-		.header("Cookie" to cookies.joinToString(separator=";"))
+		.header(
+			"User-Agent" to USER_AGENT,
+			"Cookie" to cookies.joinToString(separator=";")
+		)
 		.responseObject<EditResponse>()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
@@ -279,7 +293,10 @@ private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int)
 			"torelative" to "prev",
 			"format" to "json"
 		))
-		.header("Cookie" to cookies.joinToString(separator=";"))
+		.header(
+			"User-Agent" to USER_AGENT,
+			"Cookie" to cookies.joinToString(separator=";")
+		)
 		.responseObject<CompareResponse>()
 	http.headers.get("Set-Cookie")?.forEach { string ->
 		string.split("; *".toRegex()).forEach { cookie ->
