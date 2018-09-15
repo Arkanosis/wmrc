@@ -351,7 +351,9 @@ private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean
 }
 
 fun main(args : Array<String>) {
+	//val serverUrl = "https://fr.wikipedia.org"
+	val serverUrl = "http://localhost:8080"
 	// TODO FIXME handle login at the SUL level
-	login("https://fr.wikipedia.org", "/w", Arktest.LOGIN, Arktest.PASSWORD)
-	editPage("https://fr.wikipedia.org", "/w", "Utilisateur:Arktest/test", "Test", "Test.")
+	login(serverUrl, "/w", Arktest.LOGIN, Arktest.PASSWORD)
+	editPage(serverUrl, "/w", "Utilisateur:Arktest/test", "Test", "Test.")
 }
