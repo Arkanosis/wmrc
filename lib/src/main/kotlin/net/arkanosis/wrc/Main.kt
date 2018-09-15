@@ -79,6 +79,10 @@ data class EditResponse(
 	val edit: Edit? = null
 )
 
+data class RevertResponse(
+	val edit: Edit? = null
+)
+
 data class Compare(
 	val fromid: Int,
 	val fromrevid: Int,
@@ -285,6 +289,59 @@ private fun editPage(serverUrl: String, serverScriptPath: String, title: String,
 	return false
 }
 
+private fun revert(serverUrl: String, serverScriptPath: String, title: String, revision: Int, comment: String): Boolean {
+	val token = getToken(serverUrl, serverScriptPath, "csrf")
+	if (token == null) {
+		return false
+	}
+
+	val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
+		listOf(
+			"action" to "edit",
+			"tags" to "wmrc",
+			"assert" to "user",
+			"title" to title,
+			"summary" to comment,
+			"undo" to revision,
+			"token" to token,
+			"format" to "json"
+		))
+		.header(
+			"User-Agent" to USER_AGENT,
+			"Cookie" to cookies.joinToString(separator=";")
+		)
+		.responseObject<RevertResponse>()
+	http.headers.get("Set-Cookie")?.forEach { string ->
+		string.split("; *".toRegex()).forEach { cookie ->
+			cookies.add(cookie)
+		}
+	}
+	if (http.statusCode == 200) {
+		val (response, error) = result
+		if (error == null) {
+			if (response == null) {
+				println("KO response")
+			} else {
+				if (response.edit == null || response.edit.result != "Success") {
+					println("KO edit")
+				} else {
+					println("OK")
+					println(response.edit.newrevid)
+					return true
+				}
+			}
+		} else {
+			println("KO error")
+			println(error)
+		}
+	} else {
+		println("KO http")
+		println(http)
+	}
+	println("END")
+	return false
+}
+
 private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int) {
 	val (_, http, result) = Fuel.get("${serverUrl}${serverScriptPath}/api.php",
 		listOf(
@@ -327,10 +384,6 @@ private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int)
 	println("END")
 }
 
-private fun revert(serverUrl: String, serverScriptPath: String, revision: Int, comment: String) {
-	// TODO FIXME
-}
-
 private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean = false) {
 	try {
 		val gson = Gson()
@@ -350,7 +403,7 @@ private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean
 									showDiff(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new)
 								}
 								if (autoRevert && recentChange.comment.contains("wmrc:autorevert")) {
-									revert(recentChange.server_url, recentChange.server_script_path, recentChange.revision.new, "Autorevert")
+									revert(recentChange.server_url, recentChange.server_script_path, recentChange.title, recentChange.revision.new, "Autorevert")
 								}
 							}
 						}
@@ -368,9 +421,10 @@ private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean
 }
 
 fun main(args : Array<String>) {
-	//val serverUrl = "https://fr.wikipedia.org"
-	val serverUrl = "http://localhost:8080"
+	val serverUrl = "https://fr.wikipedia.org"
+	//val serverUrl = "http://localhost:8080"
 	// TODO FIXME handle login at the SUL level
 	login(serverUrl, "/w", Arktest.LOGIN, Arktest.PASSWORD)
 	editPage(serverUrl, "/w", "Utilisateur:Arktest/test", "Test", "Test.")
+	revert(serverUrl, "/w", "Utilisateur:Arktest/test", 152215779, "Revert")
 }
