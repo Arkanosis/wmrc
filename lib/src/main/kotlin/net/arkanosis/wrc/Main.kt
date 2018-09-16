@@ -14,6 +14,9 @@ import kotlin.collections.ArrayList
 
 import net.arkanosis.wrc.Arktest
 
+import okhttp3.*
+import okhttp3.Interceptor.*
+
 // Get the version number from the build.gradle
 const val VERSION_NAME = "0.1.0-dev"
 
@@ -453,7 +456,15 @@ private fun showDiff(serverUrl: String, serverScriptPath: String, revision: Int)
 private fun monitorRecentChanges(showDiffs: Boolean = false, autoRevert: Boolean = false) {
 	try {
 		val gson = Gson()
-		RxSSE()
+		val client = OkHttpClient.Builder()
+			.addInterceptor(object : Interceptor {
+				override fun intercept(chain: Chain): Response {
+					val request = chain.request().newBuilder().header("User-Agent", USER_AGENT).build()
+					return chain.proceed(request)
+				}
+			})
+			.build()
+		RxSSE(client)
 			.connectTo("https://stream.wikimedia.org/v2/stream/recentchange")
 			.subscribe(
 				{ event ->
