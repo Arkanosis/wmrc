@@ -53,8 +53,9 @@
 		</style>
 	</head>
 	<body>
+		<h1>Modification sur ${page} par ${author}</h1>
 		<table>
-
+${content}
 		</table>
 	</body>
 </html>
