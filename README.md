@@ -1,4 +1,4 @@
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Wmrc_logo.svg/1182px-Wmrc_logo.svg.png" align="right" width="120">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Wmrc_logo.svg/1182px-Wmrc_logo.svg.png" align="right" width="120px">
 
 # wmrc [![Version](https://img.shields.io/badge/version-v0.1.0--dev-orange.svg)](https://semver.org/spec/v2.0.0.html) [![License](https://img.shields.io/badge/license-ISC-blue.svg)](/LICENSE) [![Build status](https://travis-ci.org/Arkanosis/wmrc.svg?branch=master)](https://travis-ci.org/Arkanosis/wmrc)
 
@@ -11,6 +11,8 @@ wmrc is currently under development after a first presentation during the [2018 
 It's not ready for use and not packaged at all for the moment.
 
 ## Features
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Wmrc_0.1.0-dev.1.png" align="right" width="250px">
 
 wmrc features:
  * real time monitoring of recent changes (much faster than LiveRC);
