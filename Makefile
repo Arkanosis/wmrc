@@ -1,7 +1,9 @@
 JAVA_HOME=/opt/android-studio/jre/
 
-build: arkanosis.keystore
+build:
 	JAVA_HOME=$(JAVA_HOME) ./gradlew :app:build
+
+sign: arkanosis.keystore
 	cp app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-signed.apk
 	$(JAVA_HOME)/bin/jarsigner -verbose -sigalg SHA1withRSA -keystore arkanosis.keystore app/build/outputs/apk/release/app-release-signed.apk arkanosis
 
@@ -17,5 +19,5 @@ arkanosis.keystore:
 experiment:
 	JAVA_HOME=$(JAVA_HOME) ./gradlew :lib:run
 
-.PHONY: build install run experiment
+.PHONY: build sign install run experiment
 .NOTPARALLEL: run experiment
