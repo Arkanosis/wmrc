@@ -24,6 +24,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
+import mu.KotlinLogging
+
 import net.arkanosis.wmrc.BuildConfig
 import net.arkanosis.wmrc.R
 
@@ -154,6 +156,8 @@ data class LoginResponse(
 
 class MainActivity : BaseActivity() {
 
+    private val logger = KotlinLogging.logger {}
+
     private var spinner: ProgressBar? = null
     private var revertButton: AppCompatButton? = null
     private var approveButton: AppCompatButton? = null
@@ -196,10 +200,7 @@ class MainActivity : BaseActivity() {
                                     (recentChange.wiki == "frwiki"/* || recentChange.wiki == "frwiktionary"*/) &&
                                     recentChange.type == "edit" &&
                                     recentChange.revision != null) {
-                                    println("User '${recentChange.user}' edited '${recentChange.title}' on ${recentChange.wiki}${if (recentChange.minor) " (minor edit)" else ""}")
-
-
-
+                                    logger.info { "User '${recentChange.user}' edited '${recentChange.title}' on ${recentChange.wiki}${if (recentChange.minor) " (minor edit)" else ""}" }
                                     val (_, http, result) = Fuel.get("${recentChange.server_url}${recentChange.server_script_path}/api.php",
                                         listOf(
                                             "action" to "compare",
@@ -221,12 +222,12 @@ class MainActivity : BaseActivity() {
                                         val (response, error) = result
                                         if (error == null) {
                                             if (response == null) {
-                                                println("KO response")
+                                                logger.warn { "KO response" }
                                             } else {
                                                 if (response.compare == null) {
-                                                    println("KO compare")
+                                                    logger.warn { "KO compare" }
                                                 } else {
-                                                    println("OK")
+                                                    logger.debug { "OK" }
                                                     CoroutineScope(Dispatchers.Main).launch {
                                                         val pageTemplate = getResources().openRawResource(R.raw.template).reader().use { it.readText() }
                                                         val diff = pageTemplate
@@ -238,24 +239,24 @@ class MainActivity : BaseActivity() {
                                                 }
                                             }
                                         } else {
-                                                println("KO error")
-                                                println(error)
+                                                logger.warn { "KO error" }
+                                                logger.warn { error }
                                         }
                                     } else {
-                                            println("KO http")
-                                            println(http)
+                                            logger.warn { "KO http" }
+                                            logger.warn { http }
                                     }
                                 }
                             }
                         },
                         { error ->
-                            println("KO SSE")
-                            println(error)
+                            logger.warn { "KO SSE" }
+                            logger.warn { error }
                         }
                     )
                     .dispose()
             } catch (e: UnknownHostException) {
-                System.err.println("Unable to reach the server; are you connected to the network?")
+                logger.error { "Unable to reach the server; are you connected to the network?" }
             }
         }
     }
@@ -271,7 +272,7 @@ class MainActivity : BaseActivity() {
 
         revertButton = findViewById(R.id.revert_id)
         revertButton?.setOnClickListener {
-            println("REVERT!!")
+            logger.debug { "REVERT!!" }
             revertButton?.isEnabled = false
             approveButton?.isEnabled = false
             spinner?.visibility = View.VISIBLE
@@ -283,7 +284,7 @@ class MainActivity : BaseActivity() {
 
         approveButton = findViewById(R.id.patrol_id)
         approveButton?.setOnClickListener {
-            println("APPROVE!!")
+            logger.debug { "APPROVE!!" }
             revertButton?.isEnabled = false
             approveButton?.isEnabled = false
             spinner?.visibility = View.VISIBLE
