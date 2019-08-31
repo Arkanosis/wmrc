@@ -16,6 +16,8 @@ import android.os.Bundle
 import android.support.v7.widget.AppCompatButton
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.ProgressBar
 
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -152,7 +154,11 @@ data class LoginResponse(
 
 class MainActivity : BaseActivity() {
 
-    private var recentChanges = Channel<String>(RC_BUFFER_SIZE)
+    private var spinner: ProgressBar? = null
+    private var revertButton: AppCompatButton? = null
+    private var approveButton: AppCompatButton? = null
+
+    private val recentChanges = Channel<String>(RC_BUFFER_SIZE)
     private val cookies = ArrayList<String>()
 
     private suspend fun showNextDiff() {
@@ -160,6 +166,9 @@ class MainActivity : BaseActivity() {
             val diff = recentChanges.receive()
             web_view_id.post {
                 web_view_id.loadDataWithBaseURL(null, diff, "text/html", "utf-8", null)
+                spinner?.visibility = View.GONE
+                revertButton?.isEnabled = true
+                approveButton?.isEnabled = true
             }
         }
     }
@@ -258,15 +267,27 @@ class MainActivity : BaseActivity() {
         web_view_id.setInitialScale(1)
         web_view_id.getSettings().setUseWideViewPort(true)
 
-        val revertButton = findViewById(R.id.revert_id) as AppCompatButton
-        revertButton.setOnClickListener {
+        spinner = findViewById(R.id.spinner_id) as ProgressBar
+
+        revertButton = findViewById(R.id.revert_id)
+        revertButton?.setOnClickListener {
+            println("REVERT!!")
+            revertButton?.isEnabled = false
+            approveButton?.isEnabled = false
+            spinner?.visibility = View.VISIBLE
+            web_view_id.loadUrl("about:blank")
             CoroutineScope(Dispatchers.Main).launch {
                 showNextDiff()
             }
         }
 
-        val approveButton = findViewById(R.id.patrol_id) as AppCompatButton
-        approveButton.setOnClickListener {
+        approveButton = findViewById(R.id.patrol_id)
+        approveButton?.setOnClickListener {
+            println("APPROVE!!")
+            revertButton?.isEnabled = false
+            approveButton?.isEnabled = false
+            spinner?.visibility = View.VISIBLE
+            web_view_id.loadUrl("about:blank")
             CoroutineScope(Dispatchers.Main).launch {
                 showNextDiff()
             }
