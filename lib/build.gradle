@@ -12,7 +12,7 @@ buildscript {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation 'com.saladevs:rxsse:0.2.0'
     implementation "com.github.kittinunf.fuel:fuel-gson:$fuelVersion"
 }
