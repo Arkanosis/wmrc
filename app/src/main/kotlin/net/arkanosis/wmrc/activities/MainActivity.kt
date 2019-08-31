@@ -160,6 +160,7 @@ class MainActivity : BaseActivity() {
 
     private var spinner: ProgressBar? = null
     private var revertButton: AppCompatButton? = null
+    private var ignoreButton: AppCompatButton? = null
     private var approveButton: AppCompatButton? = null
 
     private val recentChanges = Channel<String>(RC_BUFFER_SIZE)
@@ -172,6 +173,7 @@ class MainActivity : BaseActivity() {
                 web_view_id.loadDataWithBaseURL(null, diff, "text/html", "utf-8", null)
                 spinner?.visibility = View.GONE
                 revertButton?.isEnabled = true
+                ignoreButton?.isEnabled = true
                 approveButton?.isEnabled = true
             }
         }
@@ -274,6 +276,7 @@ class MainActivity : BaseActivity() {
         revertButton?.setOnClickListener {
             logger.debug { "REVERT!!" }
             revertButton?.isEnabled = false
+            ignoreButton?.isEnabled = false
             approveButton?.isEnabled = false
             spinner?.visibility = View.VISIBLE
             web_view_id.loadUrl("about:blank")
@@ -282,10 +285,24 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        approveButton = findViewById(R.id.patrol_id)
+        ignoreButton = findViewById(R.id.ignore_id)
+        ignoreButton?.setOnClickListener {
+            logger.debug { "IGNORE!!" }
+            revertButton?.isEnabled = false
+            ignoreButton?.isEnabled = false
+            approveButton?.isEnabled = false
+            spinner?.visibility = View.VISIBLE
+            web_view_id.loadUrl("about:blank")
+            CoroutineScope(Dispatchers.Main).launch {
+                showNextDiff()
+            }
+        }
+
+        approveButton = findViewById(R.id.approve_id)
         approveButton?.setOnClickListener {
             logger.debug { "APPROVE!!" }
             revertButton?.isEnabled = false
+            ignoreButton?.isEnabled = false
             approveButton?.isEnabled = false
             spinner?.visibility = View.VISIBLE
             web_view_id.loadUrl("about:blank")

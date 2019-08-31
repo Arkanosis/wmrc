@@ -27,7 +27,7 @@
       android:background="?attr/colorPrimary"
       android:gravity="center"
       android:orientation="horizontal"
-      android:weightSum="2"
+      android:weightSum="3"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintEnd_toEndOf="parent">
@@ -36,19 +36,29 @@
         android:id="@+id/revert_id"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:layout_toLeftOf="@id/patrol_id"
+        android:layout_toLeftOf="@id/ignore_id"
         android:layout_weight="1"
         android:text="@string/activity_main_revert"
         android:textColor="@color/white"
         android:background="@color/red"/>
 
     <android.support.v7.widget.AppCompatButton
-        android:id="@+id/patrol_id"
+        android:id="@+id/ignore_id"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_toLeftOf="@id/approve_id"
+        android:layout_weight="1"
+        android:text="@string/activity_main_ignore"
+        android:textColor="@color/white"
+        android:background="@color/blue"/>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/approve_id"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         android:layout_alignParentRight="true"
         android:layout_weight="1"
-        android:text="@string/activity_main_patrol"
+        android:text="@string/activity_main_approve"
         android:textColor="@color/white"
         android:background="@color/green"/>
 
