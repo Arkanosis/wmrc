@@ -32,10 +32,7 @@ import net.arkanosis.wmrc.R
 import okhttp3.*
 import okhttp3.Interceptor.*
 
-// TODO Get the version number from the build.gradle
-const val VERSION_NAME = "0.1.0-dev"
-
-var USER_AGENT = "wmrc/v$VERSION_NAME"
+var USER_AGENT = "wmrc/v" + BuildConfig.VERSION_NAME
 
 const val RC_BUFFER_SIZE = 100
 
