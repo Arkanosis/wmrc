@@ -176,6 +176,54 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private fun queueChange(change: RecentChange) {
+	val (_, http, result) = Fuel.get("${change.server_url}${change.server_script_path}/api.php",
+	    listOf(
+		"action" to "compare",
+		"fromrev" to change.revision?.new,
+		"torelative" to "prev",
+		"format" to "json"
+	    ))
+	    .header(
+		"User-Agent" to USER_AGENT,
+		"Cookie" to cookies.joinToString(separator=";")
+	    )
+	    .responseObject<CompareResponse>()
+	http.headers.get("Set-Cookie")?.forEach { string ->
+	    string.split("; *".toRegex()).forEach { cookie ->
+		cookies.add(cookie)
+	    }
+	}
+	if (http.statusCode == 200) {
+	    val (response, error) = result
+	    if (error == null) {
+		if (response == null) {
+		    logger.warn { "KO response" }
+		} else {
+		    if (response.compare == null) {
+			logger.warn { "KO compare" }
+		    } else {
+			logger.debug { "OK" }
+			CoroutineScope(Dispatchers.Main).launch {
+			    val pageTemplate = getResources().openRawResource(R.raw.template).reader().use { it.readText() }
+			    val diff = pageTemplate
+				.replace("\${page}", change.title)
+				.replace("\${author}", change.user)
+				.replace("\${content}", response.compare.diff)
+			    recentChanges.send(diff)
+			}
+		    }
+		}
+	    } else {
+		    logger.warn { "KO error" }
+		    logger.warn { error }
+	    }
+	} else {
+		logger.warn { "KO http" }
+		logger.warn { http }
+	}
+   }
+
     private suspend fun fillChannel() {
         withContext(Dispatchers.IO) {
             try {
@@ -200,51 +248,7 @@ class MainActivity : BaseActivity() {
                                     recentChange.type == "edit" &&
                                     recentChange.revision != null) {
                                     logger.info { "User '${recentChange.user}' edited '${recentChange.title}' on ${recentChange.wiki}${if (recentChange.minor) " (minor edit)" else ""}" }
-                                    val (_, http, result) = Fuel.get("${recentChange.server_url}${recentChange.server_script_path}/api.php",
-                                        listOf(
-                                            "action" to "compare",
-                                            "fromrev" to recentChange.revision.new,
-                                            "torelative" to "prev",
-                                            "format" to "json"
-                                        ))
-                                        .header(
-                                            "User-Agent" to USER_AGENT,
-                                            "Cookie" to cookies.joinToString(separator=";")
-                                        )
-                                        .responseObject<CompareResponse>()
-                                    http.headers.get("Set-Cookie")?.forEach { string ->
-                                        string.split("; *".toRegex()).forEach { cookie ->
-                                            cookies.add(cookie)
-                                        }
-                                    }
-                                    if (http.statusCode == 200) {
-                                        val (response, error) = result
-                                        if (error == null) {
-                                            if (response == null) {
-                                                logger.warn { "KO response" }
-                                            } else {
-                                                if (response.compare == null) {
-                                                    logger.warn { "KO compare" }
-                                                } else {
-                                                    logger.debug { "OK" }
-                                                    CoroutineScope(Dispatchers.Main).launch {
-                                                        val pageTemplate = getResources().openRawResource(R.raw.template).reader().use { it.readText() }
-                                                        val diff = pageTemplate
-                                                            .replace("\${page}", recentChange.title)
-                                                            .replace("\${author}", recentChange.user)
-                                                            .replace("\${content}", response.compare.diff)
-                                                        recentChanges.send(diff)
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                                logger.warn { "KO error" }
-                                                logger.warn { error }
-                                        }
-                                    } else {
-                                            logger.warn { "KO http" }
-                                            logger.warn { http }
-                                    }
+                                    queueChange(recentChange)
                                 }
                             }
                         },
