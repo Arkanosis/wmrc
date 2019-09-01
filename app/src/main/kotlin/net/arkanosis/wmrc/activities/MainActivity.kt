@@ -172,7 +172,7 @@ class MainActivity : BaseActivity() {
     private var currentChange: RecentChange? = null
 
     private suspend fun showNextDiff() {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
             val changeWithDiff = recentChanges.receive()
             web_view_id.post {
                 web_view_id.loadDataWithBaseURL(null, changeWithDiff.diff, "text/html", "utf-8", null)
