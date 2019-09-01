@@ -2,7 +2,7 @@ package net.arkanosis.wmrc.activities
 
 import android.os.Bundle
 
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_settings.*
 
 import net.arkanosis.wmrc.R
 

@@ -13,6 +13,7 @@ import java.net.UnknownHostException
 
 import android.content.Intent
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v7.widget.AppCompatButton
 import android.view.Menu
 import android.view.MenuItem
@@ -26,7 +27,6 @@ import kotlinx.coroutines.channels.Channel
 
 import mu.KotlinLogging
 
-import net.arkanosis.wmrc.Arktest // TODO FIXME remove this
 import net.arkanosis.wmrc.BuildConfig
 import net.arkanosis.wmrc.R
 
@@ -556,10 +556,17 @@ class MainActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         CoroutineScope(Dispatchers.Main).launch {
-            fillChannel()
+            val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
+            if (preferences.contains("userapp") and preferences.contains("password")) {
+                login("https://fr.wikipedia.org", "/w", preferences.getString("userapp", ""), preferences.getString("password", ""))
+            } else {
+                val login = Intent(this@MainActivity, LoginActivity::class.java)
+                login.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(login)
+            }
         }
         CoroutineScope(Dispatchers.Main).launch {
-            login("https://fr.wikipedia.org", "/w", Arktest.LOGIN, Arktest.PASSWORD) // TODO FIXME remove this
+            fillChannel()
         }
         CoroutineScope(Dispatchers.Main).launch {
             showNextDiff()
@@ -573,6 +580,17 @@ class MainActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_logout -> {
+                val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
+                with (preferences.edit()) {
+                    remove("userapp")
+                    remove("password")
+                    commit()
+                }
+                val login = Intent(this, LoginActivity::class.java)
+                login.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(login)
+            }
             R.id.action_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             R.id.action_about -> startActivity(Intent(this, AboutActivity::class.java))
         }
