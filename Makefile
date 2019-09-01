@@ -19,5 +19,8 @@ arkanosis.keystore:
 experiment:
 	JAVA_HOME=$(JAVA_HOME) ./gradlew :lib:run
 
-.PHONY: build sign install run experiment
+clean:
+	JAVA_HOME=$(JAVA_HOME) ./gradlew clean
+
+.PHONY: build sign install run experiment clean
 .NOTPARALLEL: run experiment
