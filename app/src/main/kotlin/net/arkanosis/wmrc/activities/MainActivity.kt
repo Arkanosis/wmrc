@@ -26,6 +26,7 @@ import kotlinx.coroutines.channels.Channel
 
 import mu.KotlinLogging
 
+import net.arkanosis.wmrc.Arktest // TODO FIXME remove this
 import net.arkanosis.wmrc.BuildConfig
 import net.arkanosis.wmrc.R
 
@@ -80,6 +81,11 @@ data class RecentChange(
         val type: String,
         val user: String,
         val wiki: String
+)
+
+data class ChangeWithDiff(
+        val change: RecentChange,
+        val diff: String
 )
 
 data class Edit(
@@ -160,14 +166,17 @@ class MainActivity : BaseActivity() {
     private var ignoreButton: AppCompatButton? = null
     private var approveButton: AppCompatButton? = null
 
-    private val recentChanges = Channel<String>(RC_BUFFER_SIZE)
+    private val recentChanges = Channel<ChangeWithDiff>(RC_BUFFER_SIZE)
     private val cookies = ArrayList<String>()
+
+    private var currentChange: RecentChange? = null
 
     private suspend fun showNextDiff() {
         withContext(Dispatchers.IO) {
-            val diff = recentChanges.receive()
+            val changeWithDiff = recentChanges.receive()
             web_view_id.post {
-                web_view_id.loadDataWithBaseURL(null, diff, "text/html", "utf-8", null)
+                web_view_id.loadDataWithBaseURL(null, changeWithDiff.diff, "text/html", "utf-8", null)
+                currentChange = changeWithDiff.change
                 spinner?.visibility = View.GONE
                 revertButton?.isEnabled = true
                 ignoreButton?.isEnabled = true
@@ -177,51 +186,51 @@ class MainActivity : BaseActivity() {
     }
 
     private fun queueChange(change: RecentChange) {
-	val (_, http, result) = Fuel.get("${change.server_url}${change.server_script_path}/api.php",
-	    listOf(
-		"action" to "compare",
-		"fromrev" to change.revision?.new,
-		"torelative" to "prev",
-		"format" to "json"
-	    ))
-	    .header(
-		"User-Agent" to USER_AGENT,
-		"Cookie" to cookies.joinToString(separator=";")
-	    )
-	    .responseObject<CompareResponse>()
-	http.headers.get("Set-Cookie")?.forEach { string ->
-	    string.split("; *".toRegex()).forEach { cookie ->
-		cookies.add(cookie)
-	    }
-	}
-	if (http.statusCode == 200) {
-	    val (response, error) = result
-	    if (error == null) {
-		if (response == null) {
-		    logger.warn { "KO response" }
-		} else {
-		    if (response.compare == null) {
-			logger.warn { "KO compare" }
-		    } else {
-			logger.debug { "OK" }
-			CoroutineScope(Dispatchers.Main).launch {
-			    val pageTemplate = getResources().openRawResource(R.raw.template).reader().use { it.readText() }
-			    val diff = pageTemplate
-				.replace("\${page}", change.title)
-				.replace("\${author}", change.user)
-				.replace("\${content}", response.compare.diff)
-			    recentChanges.send(diff)
-			}
-		    }
-		}
-	    } else {
-		    logger.warn { "KO error" }
-		    logger.warn { error }
-	    }
-	} else {
-		logger.warn { "KO http" }
-		logger.warn { http }
-	}
+        val (_, http, result) = Fuel.get("${change.server_url}${change.server_script_path}/api.php",
+            listOf(
+                "action" to "compare",
+                "fromrev" to change.revision?.new,
+                "torelative" to "prev",
+                "format" to "json"
+            ))
+            .header(
+                "User-Agent" to USER_AGENT,
+                "Cookie" to cookies.joinToString(separator=";")
+            )
+            .responseObject<CompareResponse>()
+        http.headers.get("Set-Cookie")?.forEach { string ->
+            string.split("; *".toRegex()).forEach { cookie ->
+                cookies.add(cookie)
+            }
+        }
+        if (http.statusCode == 200) {
+            val (response, error) = result
+            if (error == null) {
+                if (response == null) {
+                    logger.warn { "KO response" }
+                } else {
+                    if (response.compare == null) {
+                        logger.warn { "KO compare" }
+                    } else {
+                        logger.debug { "OK" }
+                        CoroutineScope(Dispatchers.Main).launch {
+                            val pageTemplate = getResources().openRawResource(R.raw.template).reader().use { it.readText() }
+                            val diff = pageTemplate
+                                .replace("\${page}", change.title)
+                                .replace("\${author}", change.user)
+                                .replace("\${content}", response.compare.diff)
+                            recentChanges.send(ChangeWithDiff(change, diff))
+                        }
+                    }
+                }
+            } else {
+                    logger.warn { "KO error" }
+                    logger.warn { error }
+            }
+        } else {
+                logger.warn { "KO http" }
+                logger.warn { http }
+        }
    }
 
     private suspend fun fillChannel() {
@@ -264,6 +273,225 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private fun getToken(serverUrl: String, serverScriptPath: String, type: String): String? {
+        val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
+            listOf(
+                "action" to "query",
+                "type" to type,
+                "meta" to "tokens",
+                "format" to "json"
+            ))
+            .header(
+                "User-Agent" to USER_AGENT,
+                "Cookie" to cookies.joinToString(separator=";")
+            )
+            .responseObject<TokenResponse>()
+        http.headers.get("Set-Cookie")?.forEach { string ->
+            string.split("; *".toRegex()).forEach { cookie ->
+                cookies.add(cookie)
+            }
+        }
+        if (http.statusCode == 200) {
+            val (response, error) = result
+            if (error == null) {
+                if (response == null) {
+                    logger.warn { "KO response" }
+                } else {
+                    if (response.query == null) {
+                        logger.warn { "KO query" }
+                    } else {
+                        if (response.query.tokens?.logintoken != null) {
+                            logger.debug { "OK login token"}
+                            logger.debug { response.query.tokens.logintoken }
+                            return response.query.tokens.logintoken
+                        } else if (response.query.tokens?.csrftoken != null) {
+                            logger.debug { "OK csrf token" }
+                            logger.debug { response.query.tokens.csrftoken }
+                            return response.query.tokens.csrftoken
+                        } else if (response.query.tokens?.patroltoken != null) {
+                            logger.debug { "OK patrol token" }
+                            logger.debug { response.query.tokens.patroltoken }
+                            return response.query.tokens.patroltoken
+                        }  else {
+                            logger.warn { "KO token" }
+                        }
+                    }
+                }
+            } else {
+                logger.warn{ "KO error" }
+                logger.warn { error }
+            }
+        } else {
+            logger.warn { "KO http" }
+            logger.warn { http }
+        }
+        return null
+    }
+
+    private suspend fun login(serverUrl: String, serverScriptPath: String, userName: String, password: String) {
+        withContext(Dispatchers.IO) {
+            val token = getToken(serverUrl, serverScriptPath, "login")
+            if (token == null) {
+                return@withContext
+            }
+
+            val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
+                listOf(
+                    "action" to "login",
+                    "lgname" to userName,
+                    "lgpassword" to password,
+                    "lgtoken" to token,
+                    "format" to "json"
+                ))
+                .header(
+                    "User-Agent" to USER_AGENT,
+                    "Cookie" to cookies.joinToString(separator=";")
+                )
+                .responseObject<LoginResponse>()
+            http.headers.get("Set-Cookie")?.forEach { string ->
+                string.split("; *".toRegex()).forEach { cookie ->
+                    cookies.add(cookie)
+                }
+            }
+            if (http.statusCode == 200) {
+                val (response, error) = result
+                if (error == null) {
+                    if (response == null) {
+                        logger.warn  { "KO response" }
+                    } else {
+                        if (response.login == null) {
+                            logger.warn { "KO login" }
+                            logger.warn { response }
+                        } else {
+                            if (response.login.result == "Success") {
+                                logger.debug { "OK login" }
+                                logger.debug { response.login.lgusername }
+                                return@withContext
+                            } else if (response.login.result == "NeedToken") {
+                                logger.warn { "KO token needed again" }
+                            } else {
+                                logger.warn { "KO success" }
+                            }
+                        }
+                    }
+                } else {
+                    logger.warn { "KO error" }
+                    logger.warn { error }
+                }
+            } else {
+                logger.warn { "KO http" }
+                logger.warn { http }
+            }
+            logger.debug { "END" }
+        }
+    }
+
+    private suspend fun undo(serverUrl: String, serverScriptPath: String, title: String, revision: Int, comment: String) {
+        withContext(Dispatchers.IO) {
+            val token = getToken(serverUrl, serverScriptPath, "csrf")
+            if (token == null) {
+                return@withContext
+            }
+
+            val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
+                listOf(
+                    "action" to "edit",
+                    "tags" to "wmrc",
+                    "assert" to "user",
+                    "title" to title,
+                    "summary" to comment,
+                    "undo" to revision,
+                    "token" to token,
+                    "format" to "json"
+                ))
+                .header(
+                    "User-Agent" to USER_AGENT,
+                    "Cookie" to cookies.joinToString(separator=";")
+                )
+                .responseObject<UndoResponse>()
+            http.headers.get("Set-Cookie")?.forEach { string ->
+                string.split("; *".toRegex()).forEach { cookie ->
+                    cookies.add(cookie)
+                }
+            }
+            if (http.statusCode == 200) {
+                val (response, error) = result
+                if (error == null) {
+                    if (response == null) {
+                        logger.warn { "KO response" }
+                    } else {
+                        if (response.edit == null || response.edit.result != "Success") {
+                            logger.warn { "KO edit" }
+                        } else {
+                            logger.debug { "OK" }
+                            logger.debug { response.edit.newrevid }
+                            return@withContext
+                        }
+                    }
+                } else {
+                    logger.warn { "KO error" }
+                    logger.warn { error }
+                }
+            } else {
+                logger.warn { "KO http" }
+                logger.warn { http }
+            }
+            logger.debug { "END" }
+        }
+    }
+
+    private suspend fun patrol(serverUrl: String, serverScriptPath: String, revision: Int) {
+        withContext(Dispatchers.IO) {
+            val token = getToken(serverUrl, serverScriptPath, "patrol")
+            if (token == null) {
+                return@withContext
+            }
+
+            val (_, http, result) = Fuel.post("${serverUrl}${serverScriptPath}/api.php",
+                listOf(
+                    "action" to "patrol",
+                    "tags" to "wmrc",
+                    "assert" to "user",
+                    "revid" to revision,
+                    "token" to token,
+                    "format" to "json"
+                ))
+                .header(
+                    "User-Agent" to USER_AGENT,
+                    "Cookie" to cookies.joinToString(separator=";")
+                )
+                .responseObject<PatrolResponse>()
+            http.headers.get("Set-Cookie")?.forEach { string ->
+                string.split("; *".toRegex()).forEach { cookie ->
+                    cookies.add(cookie)
+                }
+            }
+            if (http.statusCode == 200) {
+                val (response, error) = result
+                if (error == null) {
+                    if (response == null) {
+                        logger.warn { "KO response" }
+                    } else {
+                        if (response.patrol == null) {
+                            logger.warn { "KO patrol" }
+                        } else {
+                            logger.debug { "OK" }
+                            logger.debug { response.patrol.rcid }
+                            return@withContext
+                        }
+                    }
+                } else {
+                    logger.warn { "KO error" }
+                    logger.warn { error }
+                }
+            } else {
+                logger.warn { "KO http" }
+                logger.warn { http }
+            }
+            logger.debug { "END" }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -282,6 +510,12 @@ class MainActivity : BaseActivity() {
             spinner?.visibility = View.VISIBLE
             web_view_id.loadUrl("about:blank")
             CoroutineScope(Dispatchers.Main).launch {
+                currentChange?.let { change ->
+                    change.revision?.let { revision ->
+                        logger.info { "REVERT title: ${change.title}, rev: ${revision.new}, user ${change.user}" }
+                        undo(change.server_url, change.server_script_path, change.title, revision.new, "Annulation de la modification de ${change.user}")
+                    }
+                }
                 showNextDiff()
             }
         }
@@ -308,6 +542,12 @@ class MainActivity : BaseActivity() {
             spinner?.visibility = View.VISIBLE
             web_view_id.loadUrl("about:blank")
             CoroutineScope(Dispatchers.Main).launch {
+                currentChange?.let { change ->
+                    change.revision?.let { revision ->
+                        logger.info { "APPROVE title: ${change.title}, rev: ${revision.new}, user ${change.user}" }
+                        patrol(change.server_url, change.server_script_path, revision.new)
+                    }
+                }
                 showNextDiff()
             }
         }
@@ -317,6 +557,9 @@ class MainActivity : BaseActivity() {
         super.onStart()
         CoroutineScope(Dispatchers.Main).launch {
             fillChannel()
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            login("https://fr.wikipedia.org", "/w", Arktest.LOGIN, Arktest.PASSWORD) // TODO FIXME remove this
         }
         CoroutineScope(Dispatchers.Main).launch {
             showNextDiff()
