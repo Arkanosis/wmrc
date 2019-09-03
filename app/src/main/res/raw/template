@@ -56,7 +56,7 @@
 		</style>
 	</head>
 	<body>
-		<h1>Modification sur ${page} par ${author}</h1>
+		<h1>Modification sur ${page} par ${author} : « <i>${summary}</i> »</h1>
 		<table>
 ${content}
 		</table>

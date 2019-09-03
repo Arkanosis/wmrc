@@ -15,6 +15,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v7.widget.AppCompatButton
+import android.text.Html
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -218,6 +219,7 @@ class MainActivity : BaseActivity() {
                             val diff = pageTemplate
                                 .replace("\${page}", change.title)
                                 .replace("\${author}", change.user)
+                                .replace("\${summary}", Html.fromHtml(change.parsedcomment).toString())
                                 .replace("\${content}", response.compare.diff)
                             recentChanges.send(ChangeWithDiff(change, diff))
                         }
