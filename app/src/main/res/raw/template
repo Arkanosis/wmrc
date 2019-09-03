@@ -50,6 +50,9 @@
 				/*background: #feeec8;*/
 				background: #ffeef0;
 			}
+			td div {
+				word-break: break-all;
+			}
 		</style>
 	</head>
 	<body>
