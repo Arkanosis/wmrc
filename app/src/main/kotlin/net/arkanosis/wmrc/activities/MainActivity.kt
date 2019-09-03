@@ -501,6 +501,21 @@ class MainActivity : BaseActivity() {
 
         spinner = findViewById(R.id.spinner_id) as ProgressBar
 
+        CoroutineScope(Dispatchers.Main).launch {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
+            if (preferences.contains("userapp") and preferences.contains("password")) {
+                login("https://fr.wikipedia.org", "/w", preferences.getString("userapp", ""), preferences.getString("password", ""))
+            } else {
+                val login = Intent(this@MainActivity, LoginActivity::class.java)
+                login.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(login)
+            }
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            fillChannel()
+        }
+
         revertButton = findViewById(R.id.revert_id)
         revertButton?.setOnClickListener {
             logger.debug { "REVERT!!" }
@@ -551,23 +566,7 @@ class MainActivity : BaseActivity() {
                 showNextDiff()
             }
         }
-    }
 
-    override fun onStart() {
-        super.onStart()
-        CoroutineScope(Dispatchers.Main).launch {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
-            if (preferences.contains("userapp") and preferences.contains("password")) {
-                login("https://fr.wikipedia.org", "/w", preferences.getString("userapp", ""), preferences.getString("password", ""))
-            } else {
-                val login = Intent(this@MainActivity, LoginActivity::class.java)
-                login.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                startActivity(login)
-            }
-        }
-        CoroutineScope(Dispatchers.Main).launch {
-            fillChannel()
-        }
         CoroutineScope(Dispatchers.Main).launch {
             showNextDiff()
         }
