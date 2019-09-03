@@ -528,7 +528,7 @@ class MainActivity : BaseActivity() {
                 currentChange?.let { change ->
                     change.revision?.let { revision ->
                         logger.info { "REVERT title: ${change.title}, rev: ${revision.new}, user ${change.user}" }
-                        undo(change.server_url, change.server_script_path, change.title, revision.new, "Annulation de la modification de ${change.user}")
+                        undo(change.server_url, change.server_script_path, change.title, revision.new, "Annulation de la modification de [[Special:Contributions/${change.user}|${change.user}]]")
                     }
                 }
                 showNextDiff()
