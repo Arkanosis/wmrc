@@ -34,7 +34,7 @@ wmrc is not yet ready for mainstream usage. However, if you want to test it now 
  * Address: https://apk.arkanosis.net
  * Fingerprint: 655955660F34A4DB7CC2B30D96B8B546759D6AEABC83D34AE682B73A7C24FE62
  
-You can also add this F-Droid repository by scanning this QR code:
+You can also add this F-Droid repository by [direct link](https://apk.arkanosis.net/fdroid/repo?fingerprint=655955660F34A4DB7CC2B30D96B8B546759D6AEABC83D34AE682B73A7C24FE62) or scanning this QR code:
 
 ![wmrc F-Droid repository QR code](/images/fdroid-qr.png?raw=true)
  
