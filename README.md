@@ -8,8 +8,6 @@
 
 wmrc is currently under development after a first presentation during the [2018 French WikiConvention](https://meta.wikimedia.org/wiki/WikiConvention_francophone/2018), in Grenoble, on the 6th of October 2018. The next demo will happen during the [2019 French WikiConvention](https://meta.wikimedia.org/wiki/WikiConvention_francophone/2019), in Bruxelles, on the 7th of September 2019.
 
-It's not ready for use and not packaged at all for the moment.
-
 ## Features
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Wmrc_0.1.0-dev.1.png" align="right" width="250px">
@@ -29,11 +27,24 @@ wmrc is designed with internationalization in mind and already available in the 
  * English,
  * French.
 
-## Compiling and installing
+## Installation
 
-Once ready for mainstream usage, wmrc will be distributed for free through [F-Droid](https://f-droid.org/), and *maybe* through [Google Play](https://play.google.com/store) as well.
+wmrc is not yet ready for mainstream usage. However, if you want to test it now and don't mind a minimal feature set a few occasional crashes here and there, you can install it through [F-Droid](https://f-droid.org/), by adding the following repository:
 
-Until then, clone this repository and use:
+ * Address: https://apk.arkanosis.net
+ * Fingerprint: 655955660F34A4DB7CC2B30D96B8B546759D6AEABC83D34AE682B73A7C24FE62
+ 
+You can also add this F-Droid repository by scanning this QR code:
+
+![wmrc F-Droid repository QR code](/images/fdroid-qr.png?raw=true)
+ 
+Alternatively, you can [download the apk](https://apk.arkanosis.net/fdroid/repo/wmrc.apk) ([PGP signature](https://apk.arkanosis.net/fdroid/repo/wmrc.apk.asc)) and install it manually (but you will have to install updates manually as well).
+
+Once ready for mainstream usage, wmrc will be distributed for free through the main [F-Droid](https://f-droid.org/) repository, and *maybe* through [Google Play](https://play.google.com/store) as well.
+
+## Compiling
+
+If you want to compile wmrc yourself, clone this repository and use:
  * `make build` to compile;
  * `make sign` to sign the apk (mandatory to use on non-developer devices);
  * `make install` to deploy on the mobile device;
