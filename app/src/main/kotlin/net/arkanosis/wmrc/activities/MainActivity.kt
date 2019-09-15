@@ -503,15 +503,16 @@ class MainActivity : BaseActivity() {
 
         spinner = findViewById(R.id.spinner_id) as ProgressBar
 
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
+        if (!preferences.contains("userapp") or !preferences.contains("password")) {
+            val login = Intent(this@MainActivity, LoginActivity::class.java)
+            login.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(login)
+            return
+        }
+
         CoroutineScope(Dispatchers.Main).launch {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
-            if (preferences.contains("userapp") and preferences.contains("password")) {
-                login("https://fr.wikipedia.org", "/w", preferences.getString("userapp", ""), preferences.getString("password", ""))
-            } else {
-                val login = Intent(this@MainActivity, LoginActivity::class.java)
-                login.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                startActivity(login)
-            }
+            login("https://fr.wikipedia.org", "/w", preferences.getString("userapp", ""), preferences.getString("password", ""))
         }
 
         CoroutineScope(Dispatchers.Main).launch {
