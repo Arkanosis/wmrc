@@ -34,7 +34,7 @@ import net.arkanosis.wmrc.R
 import okhttp3.*
 import okhttp3.Interceptor.*
 
-var USER_AGENT = "wmrc/v" + BuildConfig.VERSION_NAME
+var USER_AGENT = "wmrc/" + BuildConfig.VERSION_NAME + " (+https://wmrc.arkanosis.net/)"
 
 const val RC_BUFFER_SIZE = 100
 
