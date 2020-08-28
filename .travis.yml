@@ -3,13 +3,14 @@ jdk: oraclejdk8
 
 android:
   components:
-    - build-tools-27.0.3
     - android-28
+    - build-tools-29.0.2
 
 before_install:
   - chmod +x gradlew
   - chmod +x gradle/wrapper/gradle-wrapper.jar
   - yes | sdkmanager "platforms;android-28"
+  - yes | sdkmanager "build-tools;29.0.2"
 script:
   - ./gradlew test build
 
