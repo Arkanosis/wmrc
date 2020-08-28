@@ -51,7 +51,7 @@ data class Meta(
         val domain: String,
         val dt: String,
         val id: String,
-        val offset: Int,
+        val offset: Long,
         val partition: Int,
         val request_id: String,
         val schema_uri: String,
