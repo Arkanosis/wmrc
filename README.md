@@ -6,7 +6,9 @@
 
 ## Current status
 
-wmrc is currently under development after a first presentation during the [2018 French WikiConvention](https://meta.wikimedia.org/wiki/WikiConvention_francophone/2018), in Grenoble, on the 6th of October 2018. The next demo will happen during the [2019 French WikiConvention](https://meta.wikimedia.org/wiki/WikiConvention_francophone/2019), in Bruxelles, on the 7th of September 2019.
+wmrc is currently under development after a two presentations at the [2018 French WikiConvention](https://meta.wikimedia.org/wiki/WikiConvention_francophone/2018) (Grenoble, 6th of October 2018) and at the [2019 French WikiConvention](https://meta.wikimedia.org/wiki/WikiConvention_francophone/2019) (Bruxelles, 7th of September 2019).
+
+As of August 2020, you need to build wmrc yourself as the version available through the F-Droid repository below does not support the more than 2 billions revisions which have been reached. Also, [you need to use Android 5 or higher](https://github.com/Arkanosis/wmrc/issues/23), as older versions of Android are not compatible with the HTTPS protocol version enforced by the Wikimedia projects these days.
 
 ## Features
 
